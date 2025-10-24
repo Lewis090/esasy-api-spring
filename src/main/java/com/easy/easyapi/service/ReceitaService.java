@@ -1,36 +1,47 @@
 package com.easy.easyapi.service;
 
 import com.easy.easyapi.model.Receita;
+import com.easy.easyapi.model.Usuario;
 import com.easy.easyapi.repository.ReceitaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReceitaService {
-    private final ReceitaRepository repo;
 
-    public ReceitaService(ReceitaRepository repo) {
-        this.repo = repo;
+    private final ReceitaRepository receitaRepository;
+
+    public ReceitaService(ReceitaRepository receitaRepository) {
+        this.receitaRepository = receitaRepository;
     }
 
-    public List<Receita> listar() {
-        return repo.findAll();
+    public List<Receita> buscarPorUsuario(Usuario usuario) {
+        return receitaRepository.findByUsuario(usuario);
     }
 
-    public Receita salvar(Receita r) {
-        return repo.save(r);
+    public Receita salvar(Receita receita, Usuario usuario) {
+        receita.setUsuario(usuario);
+        return receitaRepository.save(receita);
     }
 
-    public Receita atualizar(Long id, Receita r) {
-        Receita existente = repo.findById(id).orElseThrow(() -> new RuntimeException("Receita não encontrada"));
-        if (r.getDescricao() != null) existente.setDescricao(r.getDescricao());
-        if (r.getValor() != null) existente.setValor(r.getValor());
-        if (r.getData() != null) existente.setData(r.getData());
-        return repo.save(existente);
+    public Receita atualizar(Long id, Receita receitaAtualizada, Usuario usuario) {
+        Receita receita = receitaRepository.findByIdAndUsuario(id, usuario)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+        receita.setDescricao(receitaAtualizada.getDescricao());
+        receita.setValor(receitaAtualizada.getValor());
+        receita.setData(receitaAtualizada.getData());
+        return receitaRepository.save(receita);
     }
 
-    public void deletar(Long id) {
-        repo.deleteById(id);
+    public void deletar(Long id, Usuario usuario) {
+        Receita receita = receitaRepository.findByIdAndUsuario(id, usuario)
+                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
+        receitaRepository.delete(receita);
+    }
+
+    public Optional<Receita> buscarPorIdEUsuario(Long id, Usuario usuario) {
+        return receitaRepository.findByIdAndUsuario(id, usuario);
     }
 }

@@ -1,45 +1,40 @@
 package com.easy.easyapi.controller;
 
 import com.easy.easyapi.model.Despesa;
+import com.easy.easyapi.model.Usuario;
 import com.easy.easyapi.service.DespesaService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.easy.easyapi.service.UsuarioService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/despesas")
-@CrossOrigin(origins = "*")
+@RequestMapping("/usuarios/{usuarioId}/despesas")
 public class DespesaController {
 
-    private final DespesaService service;
+    private final DespesaService despesaService;
+    private final UsuarioService usuarioService;
 
-    public DespesaController(DespesaService service) {
-        this.service = service;
+    public DespesaController(DespesaService despesaService, UsuarioService usuarioService) {
+        this.despesaService = despesaService;
+        this.usuarioService = usuarioService;
     }
 
     @GetMapping
-    public List<Despesa> listar() {
-         return service.listar();
+    public List<Despesa> listar(@PathVariable Long usuarioId) {
+        Usuario u = usuarioService.buscarPorId(usuarioId).orElseThrow();
+        return despesaService.listarPorUsuario(u);
     }
 
     @PostMapping
-    public ResponseEntity<String> criar(@RequestBody Despesa d) {
-        service.salvar(d);
-        String mensagem = "Despesa criada com sucesso!! =)";
-        return  new ResponseEntity<>(mensagem, HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<String> atualizar(@PathVariable Long id, @RequestBody Despesa d) {
-         service.atualizar(id, d);
-         String mensagem = "Despesa Atualizada!";
-         return new ResponseEntity<>(mensagem,HttpStatus.OK);
+    public Despesa criar(@PathVariable Long usuarioId, @RequestBody Despesa d) {
+        Usuario u = usuarioService.buscarPorId(usuarioId).orElseThrow();
+        d.setUsuario(u);
+        return despesaService.salvar(d);
     }
 
     @DeleteMapping("/{id}")
     public void deletar(@PathVariable Long id) {
-        service.deletar(id);
+        despesaService.deletar(id);
     }
 }
