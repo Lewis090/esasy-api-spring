@@ -1,5 +1,7 @@
 package com.easy.easyapi.controller;
 
+import com.easy.easyapi.dto.UsuarioCreateDTO;
+import com.easy.easyapi.dto.UsuarioDTO;
 import com.easy.easyapi.model.Usuario;
 import com.easy.easyapi.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -20,37 +24,38 @@ public class UsuarioController {
 
     // 🔹 Listar todos usuários
     @GetMapping
-    public ResponseEntity<List<Usuario>> listarUsuarios() {
+    public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
-        return ResponseEntity.ok(usuarios);
+        List<UsuarioDTO> dtos = usuarios.stream().map(UsuarioDTO::fromEntity).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // 🔹 Buscar usuário por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
         return usuarioOpt
-                .map(ResponseEntity::ok)
+                .map(u -> ResponseEntity.ok(UsuarioDTO.fromEntity(u)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // 🔹 Criar usuário (cadastro)
     @PostMapping
-    public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario) {
-        // ⚠️ opcional: você pode validar se o email já existe aqui
+    public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody UsuarioCreateDTO usuarioDto) {
+        Usuario usuario = usuarioDto.toEntity();
         Usuario salvo = usuarioRepository.save(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioDTO.fromEntity(salvo));
     }
 
     // 🔹 Atualizar usuário
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario u) {
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioCreateDTO u) {
         return usuarioRepository.findById(id).map(usuarioExistente -> {
             usuarioExistente.setNome(u.getNome());
             usuarioExistente.setEmail(u.getEmail());
             usuarioExistente.setSenha(u.getSenha());
             Usuario atualizado = usuarioRepository.save(usuarioExistente);
-            return ResponseEntity.ok(atualizado);
+            return ResponseEntity.ok(UsuarioDTO.fromEntity(atualizado));
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -67,10 +72,10 @@ public class UsuarioController {
 
     // 🔹 Login do usuário
     @PostMapping("/login")
-    public ResponseEntity<Usuario> login(@RequestBody Usuario u) {
+    public ResponseEntity<UsuarioDTO> login(@RequestBody UsuarioCreateDTO u) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailAndSenha(u.getEmail(), u.getSenha());
         return usuarioOpt
-                .map(ResponseEntity::ok)
+                .map(user -> ResponseEntity.ok(UsuarioDTO.fromEntity(user)))
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 }

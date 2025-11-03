@@ -1,5 +1,7 @@
 package com.easy.easyapi.controller;
 
+import com.easy.easyapi.dto.ReceitaCreateDTO;
+import com.easy.easyapi.dto.ReceitaDTO;
 import com.easy.easyapi.model.Receita;
 import com.easy.easyapi.model.Usuario;
 import com.easy.easyapi.service.ReceitaService;
@@ -8,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/usuarios/{usuarioId}/receitas")
@@ -24,49 +29,63 @@ public class ReceitaController {
 
     // Listar todas as receitas do usuário
     @GetMapping
-    public ResponseEntity<List<Receita>> listar(@PathVariable Long usuarioId) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        List<Receita> receitas = receitaService.buscarPorUsuario(usuario);
-        return ResponseEntity.ok(receitas);
+    public ResponseEntity<List<ReceitaDTO>> listar(@PathVariable Long usuarioId) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        List<ReceitaDTO> dtos = receitaService.buscarPorUsuario(usuarioOpt.get()).stream()
+                .map(ReceitaDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     // Criar nova receita
     @PostMapping
-    public ResponseEntity<Receita> criar(@PathVariable Long usuarioId, @RequestBody Receita receita) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        Receita novaReceita = receitaService.salvar(receita, usuario);
-        return new ResponseEntity<>(novaReceita, HttpStatus.CREATED);
+    public ResponseEntity<ReceitaDTO> criar(@PathVariable Long usuarioId, @Valid @RequestBody ReceitaCreateDTO receitaDto) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Receita novaReceita = receitaService.salvar(receitaDto.toEntity(), usuarioOpt.get());
+        return new ResponseEntity<>(ReceitaDTO.fromEntity(novaReceita), HttpStatus.CREATED);
     }
 
     // Atualizar receita
     @PutMapping("/{id}")
-    public ResponseEntity<Receita> atualizar(@PathVariable Long usuarioId,
+    public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long usuarioId,
                                              @PathVariable Long id,
-                                             @RequestBody Receita receitaAtualizada) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        Receita receita = receitaService.atualizar(id, receitaAtualizada, usuario);
-        return ResponseEntity.ok(receita);
+                                             @Valid @RequestBody ReceitaCreateDTO receitaAtualizada) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Receita receita = receitaService.atualizar(id, receitaAtualizada.toEntity(), usuarioOpt.get());
+        return ResponseEntity.ok(ReceitaDTO.fromEntity(receita));
     }
 
     // Deletar receita
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long usuarioId, @PathVariable Long id) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        receitaService.deletar(id, usuario);
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        receitaService.deletar(id, usuarioOpt.get());
         return ResponseEntity.noContent().build();
     }
 
     // Buscar receita específica
     @GetMapping("/{id}")
-    public ResponseEntity<Receita> buscar(@PathVariable Long usuarioId, @PathVariable Long id) {
-        Usuario usuario = usuarioService.buscarPorId(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        Receita receita = receitaService.buscarPorIdEUsuario(id, usuario)
-                .orElseThrow(() -> new RuntimeException("Receita não encontrada"));
-        return ResponseEntity.ok(receita);
+    public ResponseEntity<ReceitaDTO> buscar(@PathVariable Long usuarioId, @PathVariable Long id) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Optional<Receita> receitaOpt = receitaService.buscarPorIdEUsuario(id, usuarioOpt.get());
+        if (receitaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ReceitaDTO.fromEntity(receitaOpt.get()));
     }
 }

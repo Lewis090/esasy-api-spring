@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d easyapi" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
@@ -20,7 +25,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/easyapi
+      # Ensure the app doesn't attempt SSL during local/dev containerized runs
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-db:5432/easyapi?sslmode=disable"
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
     depends_on:
