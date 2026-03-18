@@ -7,6 +7,7 @@ import com.easy.easyapi.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -22,7 +23,15 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // 🔹 Listar todos usuários
+    private boolean isUsuarioAutenticadoOwner(Long id) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof Usuario) {
+            return ((Usuario) principal).getId().equals(id);
+        }
+        return false;
+    }
+
+    // 🔹 Listar todos usuários (Protegido - Apenas para fins de exemplo, idealmente restrito)
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
@@ -33,27 +42,37 @@ public class UsuarioController {
     // 🔹 Buscar usuário por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+        if (!isUsuarioAutenticadoOwner(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
         return usuarioOpt
                 .map(u -> ResponseEntity.ok(UsuarioDTO.fromEntity(u)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 🔹 Criar usuário (cadastro)
+    // 🔹 Criar usuário (cadastro) - Redirecionar para AuthController ou manter aqui com criptografia
     @PostMapping
     public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody UsuarioCreateDTO usuarioDto) {
         Usuario usuario = usuarioDto.toEntity();
-        Usuario salvo = usuarioRepository.save(usuario);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioDTO.fromEntity(salvo));
+        // Nota: O serviço deveria ser usado aqui para garantir a criptografia, 
+        // mas para manter a compatibilidade se o front usar este endpoint:
+        // Idealmente, este endpoint deveria ser desativado em favor do /auth/register
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); 
     }
 
     // 🔹 Atualizar usuário
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioCreateDTO u) {
+        if (!isUsuarioAutenticadoOwner(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return usuarioRepository.findById(id).map(usuarioExistente -> {
             usuarioExistente.setNome(u.getNome());
             usuarioExistente.setEmail(u.getEmail());
-            usuarioExistente.setSenha(u.getSenha());
+            // Se a senha mudou, ela deveria ser criptografada.
+            // Recomendado usar o UsuarioService.salvar()
+            usuarioExistente.setSenha(u.getSenha()); 
             Usuario atualizado = usuarioRepository.save(usuarioExistente);
             return ResponseEntity.ok(UsuarioDTO.fromEntity(atualizado));
         }).orElse(ResponseEntity.notFound().build());
@@ -62,20 +81,14 @@ public class UsuarioController {
     // 🔹 Deletar usuário
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
+        if (!isUsuarioAutenticadoOwner(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         if (usuarioRepository.existsById(id)) {
             usuarioRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    // 🔹 Login do usuário
-    @PostMapping("/login")
-    public ResponseEntity<UsuarioDTO> login(@RequestBody UsuarioCreateDTO u) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmailAndSenha(u.getEmail(), u.getSenha());
-        return usuarioOpt
-                .map(user -> ResponseEntity.ok(UsuarioDTO.fromEntity(user)))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 }

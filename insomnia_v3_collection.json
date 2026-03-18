@@ -1,0 +1,266 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2026-03-18T22:40:00.000Z",
+	"__export_source": "insomnia.desktop.app:v8.6.1",
+	"resources": [
+		{
+			"_id": "wrk_1",
+			"parentId": null,
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "EasyApi - Autenticação JWT",
+			"description": "Coleção para testar a aplicação EasyApi (Spring Boot) após a implementação da segurança com JWT.",
+			"scope": "collection",
+			"_type": "workspace"
+		},
+		{
+			"_id": "env_1",
+			"parentId": "wrk_1",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "Ambiente Base",
+			"data": {
+				"baseUrl": "http://localhost:8080",
+				"jwt_token": "COLE_O_TOKEN_AQUI",
+				"usuarioId": "1"
+			},
+			"dataPropertyOrder": {
+				"&": ["baseUrl", "jwt_token", "usuarioId"]
+			},
+			"color": null,
+			"isPrivate": false,
+			"metaSortKey": 1710795120000,
+			"_type": "environment"
+		},
+		{
+			"_id": "fld_auth",
+			"parentId": "wrk_1",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "1. Autenticação",
+			"description": "Endpoints públicos para cadastro e login.",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1710795120000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_register",
+			"parentId": "fld_auth",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/auth/register",
+			"name": "Criar Nova Conta (Register)",
+			"description": "Cria um novo usuário e já retorna o token de acesso.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"nome\": \"Usuário Teste\",\n  \"email\": \"teste@email.com\",\n  \"senha\": \"senha123\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795120000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_login",
+			"parentId": "fld_auth",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/auth/login",
+			"name": "Fazer Login",
+			"description": "Autentica um usuário existente e retorna o token JWT.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"email\": \"teste@email.com\",\n  \"senha\": \"senha123\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795110000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_despesas",
+			"parentId": "wrk_1",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "2. Despesas (Protegido)",
+			"description": "Endpoints protegidos para gestão de despesas.",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1710795100000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_list_despesas",
+			"parentId": "fld_despesas",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/usuarios/{{ _.usuarioId }}/despesas",
+			"name": "Listar Minhas Despesas",
+			"description": "Lista todas as despesas do usuário logado.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795120000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "req_create_despesa",
+			"parentId": "fld_despesas",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/usuarios/{{ _.usuarioId }}/despesas",
+			"name": "Cadastrar Despesa",
+			"description": "Cria uma nova despesa para o usuário logado.",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n  \"descricao\": \"Compra de Equipamentos\",\n  \"valor\": 500.00,\n  \"data\": \"2026-03-20\"\n}"
+			},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}"
+				},
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795110000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_receitas",
+			"parentId": "wrk_1",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "3. Receitas (Protegido)",
+			"description": "Endpoints protegidos para gestão de receitas.",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1710795090000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_list_receitas",
+			"parentId": "fld_receitas",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/usuarios/{{ _.usuarioId }}/receitas",
+			"name": "Listar Minhas Receitas",
+			"description": "Lista todas as receitas do usuário logado.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795120000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		},
+		{
+			"_id": "fld_usuarios",
+			"parentId": "wrk_1",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"name": "4. Usuários",
+			"description": "Endpoints para gestão de perfil.",
+			"environment": {},
+			"environmentPropertyOrder": null,
+			"metaSortKey": -1710795080000,
+			"_type": "request_group"
+		},
+		{
+			"_id": "req_get_perfil",
+			"parentId": "fld_usuarios",
+			"modified": 1710795120000,
+			"created": 1710795120000,
+			"url": "{{ _.baseUrl }}/usuarios/{{ _.usuarioId }}",
+			"name": "Ver Meu Perfil",
+			"description": "Visualiza os dados do perfil do usuário logado.",
+			"method": "GET",
+			"body": {},
+			"parameters": [],
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.jwt_token }}"
+				}
+			],
+			"authentication": {},
+			"metaSortKey": -1710795120000,
+			"isPrivate": false,
+			"settingStoreCookies": true,
+			"settingSendCookies": true,
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingRebuildPath": true,
+			"settingFollowRedirects": "global",
+			"_type": "request"
+		}
+	]
+}

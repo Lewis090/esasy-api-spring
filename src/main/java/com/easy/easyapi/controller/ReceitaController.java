@@ -8,6 +8,7 @@ import com.easy.easyapi.service.ReceitaService;
 import com.easy.easyapi.service.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -27,9 +28,17 @@ public class ReceitaController {
         this.usuarioService = usuarioService;
     }
 
+    private boolean isUsuarioAutenticadoOwner(Long usuarioId) {
+        Usuario autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return autenticado.getId().equals(usuarioId);
+    }
+
     // Listar todas as receitas do usuário
     @GetMapping
     public ResponseEntity<List<ReceitaDTO>> listar(@PathVariable Long usuarioId) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -43,6 +52,9 @@ public class ReceitaController {
     // Criar nova receita
     @PostMapping
     public ResponseEntity<ReceitaDTO> criar(@PathVariable Long usuarioId, @Valid @RequestBody ReceitaCreateDTO receitaDto) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -56,6 +68,9 @@ public class ReceitaController {
     public ResponseEntity<ReceitaDTO> atualizar(@PathVariable Long usuarioId,
                                              @PathVariable Long id,
                                              @Valid @RequestBody ReceitaCreateDTO receitaAtualizada) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -67,6 +82,9 @@ public class ReceitaController {
     // Deletar receita
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long usuarioId, @PathVariable Long id) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -78,6 +96,9 @@ public class ReceitaController {
     // Buscar receita específica
     @GetMapping("/{id}")
     public ResponseEntity<ReceitaDTO> buscar(@PathVariable Long usuarioId, @PathVariable Long id) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(usuarioId);
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.notFound().build();

@@ -7,6 +7,7 @@ import com.easy.easyapi.model.Usuario;
 import com.easy.easyapi.service.DespesaService;
 import com.easy.easyapi.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -26,8 +27,16 @@ public class DespesaController {
         this.usuarioService = usuarioService;
     }
 
+    private boolean isUsuarioAutenticadoOwner(Long usuarioId) {
+        Usuario autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return autenticado.getId().equals(usuarioId);
+    }
+
     @GetMapping
     public ResponseEntity<List<DespesaDTO>> listar(@PathVariable Long usuarioId) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(403).build();
+        }
         Optional<Usuario> uOpt = usuarioService.buscarPorId(usuarioId);
         if (uOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -40,6 +49,9 @@ public class DespesaController {
 
     @PostMapping
     public ResponseEntity<DespesaDTO> criar(@PathVariable Long usuarioId, @Valid @RequestBody DespesaCreateDTO dDto) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(403).build();
+        }
         Optional<Usuario> uOpt = usuarioService.buscarPorId(usuarioId);
         if (uOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -52,7 +64,10 @@ public class DespesaController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable Long usuarioId, @PathVariable Long id) {
+        if (!isUsuarioAutenticadoOwner(usuarioId)) {
+            return ResponseEntity.status(403).build();
+        }
         despesaService.deletar(id);
         return ResponseEntity.noContent().build();
     }

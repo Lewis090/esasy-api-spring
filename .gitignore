@@ -1,0 +1,12 @@
+target/
+.idea/
+.vscode/
+data/
+*.iml
+.DS_Store
+*.log
+out/
+build/
+bin/
+temp/
+tmp/

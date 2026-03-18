@@ -11,13 +11,18 @@ import java.util.Optional;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Salva ou atualiza usuário
     public Usuario salvar(Usuario usuario) {
+        if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) {
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        }
         return usuarioRepository.save(usuario);
     }
 

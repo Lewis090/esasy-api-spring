@@ -1,9 +1,15 @@
 package com.easy.easyapi.controller;
 
+import com.easy.easyapi.dto.LoginResponse;
 import com.easy.easyapi.dto.UsuarioCreateDTO;
 import com.easy.easyapi.model.Usuario;
+import com.easy.easyapi.security.JwtService;
 import com.easy.easyapi.service.UsuarioService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -12,13 +18,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final UsuarioService usuarioService;
-
-    public AuthController(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
-    }
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     // --- Cadastro ---
     @PostMapping("/register")
@@ -31,9 +36,13 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        // Salva usuário
+        // Salva usuário (o serviço agora criptografa a senha)
         Usuario salvo = usuarioService.salvar(usuarioDto.toEntity());
+        
+        String jwtToken = jwtService.generateToken(salvo);
+
         response.put("mensagem", "Usuário cadastrado com sucesso!");
+        response.put("token", jwtToken);
         response.put("id", salvo.getId());
         response.put("nome", salvo.getNome());
 
@@ -41,37 +50,23 @@ public class AuthController {
     }
 
     // --- Login ---
-    @RequestMapping(value = "/login", method = {RequestMethod.GET, RequestMethod.POST})
-    public ResponseEntity<Map<String, Object>> login(
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String senha,
-            @RequestBody(required = false) UsuarioCreateDTO usuarioDto) {
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UsuarioCreateDTO usuarioDto) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        usuarioDto.getEmail(),
+                        usuarioDto.getSenha()
+                )
+        );
 
-        // Prioriza dados do body, senão usa query params
-        String emailFinal = (usuarioDto != null && usuarioDto.getEmail() != null) ? usuarioDto.getEmail() : email;
-        String senhaFinal = (usuarioDto != null && usuarioDto.getSenha() != null) ? usuarioDto.getSenha() : senha;
+        Usuario user = (Usuario) authentication.getPrincipal();
+        String jwtToken = jwtService.generateToken(user);
 
-        if (emailFinal == null || senhaFinal == null) {
-            response.put("mensagem", "Email e senha são obrigatórios");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        return usuarioService.buscarPorEmail(emailFinal)
-                .map(u -> {
-                    if (u.getSenha().equals(senhaFinal)) {
-                        response.put("id", u.getId());
-                        response.put("nome", u.getNome());
-                        response.put("mensagem", "Login realizado com sucesso!");
-                        return ResponseEntity.ok(response);
-                    } else {
-                        response.put("mensagem", "Senha incorreta");
-                        return ResponseEntity.badRequest().body(response);
-                    }
-                })
-                .orElseGet(() -> {
-                    response.put("mensagem", "Usuário não encontrado");
-                    return ResponseEntity.badRequest().body(response);
-                });
+        return ResponseEntity.ok(LoginResponse.builder()
+                .token(jwtToken)
+                .id(user.getId())
+                .nome(user.getNome())
+                .mensagem("Login realizado com sucesso!")
+                .build());
     }
 }
