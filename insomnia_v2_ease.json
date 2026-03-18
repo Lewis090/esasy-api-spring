@@ -1,0 +1,90 @@
+{
+	"client": "Insomnia",
+	"collectionName": "EASE API v2.0 - Gestão MEI",
+	"dateCreated": 1709475600000,
+	"format": 1,
+	"items": [
+		{
+			"_type": "request_group",
+			"name": "Autenticação e Usuário",
+			"children": [
+				{
+					"_type": "request",
+					"method": "POST",
+					"url": "http://localhost:8080/api/v2/user/foto-perfil?userId=1",
+					"name": "Upload Foto Perfil",
+					"body": {
+						"mimeType": "multipart/form-data",
+						"params": [
+							{
+								"name": "file",
+								"type": "file",
+								"value": ""
+							}
+						]
+					}
+				},
+				{
+					"_type": "request",
+					"method": "PUT",
+					"url": "http://localhost:8080/api/v2/user/perfil?userId=1",
+					"name": "Atualizar Dados Empresa",
+					"body": {
+						"mimeType": "application/json",
+						"text": "{\n  \"nomeEmpresa\": \"Minha Empresa MEI\",\n  \"temFuncionario\": true,\n  \"salarioFuncionario\": 1412.00\n}"
+					}
+				}
+			]
+		},
+		{
+			"_type": "request_group",
+			"name": "Lançamentos (v2)",
+			"children": [
+				{
+					"_type": "request",
+					"method": "POST",
+					"url": "http://localhost:8080/api/v2/lancamentos?userId=1",
+					"name": "Criar Receita",
+					"body": {
+						"mimeType": "application/json",
+						"text": "{\n  \"descricao\": \"Venda de Produto A\",\n  \"valor\": 500.00,\n  \"data\": \"2026-06-15\",\n  \"tipo\": \"RECEITA\",\n  \"formaRecebimento\": \"PIX\"\n}"
+					}
+				},
+				{
+					"_type": "request",
+					"method": "POST",
+					"url": "http://localhost:8080/api/v2/lancamentos?userId=1",
+					"name": "Criar Despesa Fixa",
+					"body": {
+						"mimeType": "application/json",
+						"text": "{\n  \"descricao\": \"Aluguel Sala\",\n  \"valor\": 1200.00,\n  \"data\": \"2026-06-05\",\n  \"tipo\": \"DESPESA_FIXA\",\n  \"formaRecebimento\": \"DINHEIRO\"\n}"
+					}
+				},
+				{
+					"_type": "request",
+					"method": "GET",
+					"url": "http://localhost:8080/api/v2/lancamentos?userId=1",
+					"name": "Listar Todos Lançamentos"
+				}
+			]
+		},
+		{
+			"_type": "request_group",
+			"name": "Projeções e Fiscal",
+			"children": [
+				{
+					"_type": "request",
+					"method": "GET",
+					"url": "http://localhost:8080/api/v2/projecoes?ano=2026&mes=6&userId=1",
+					"name": "Consultar Projeção Mensal"
+				},
+				{
+					"_type": "request",
+					"method": "GET",
+					"url": "http://localhost:8080/api/v2/anos-fiscais?userId=1",
+					"name": "Consultar Status do Teto Anual"
+				}
+			]
+		}
+	]
+}

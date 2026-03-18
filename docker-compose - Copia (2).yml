@@ -12,7 +12,7 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d easyapi" ]
+      test: ["CMD-SHELL", "pg_isready -U admin -d easyapi"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,19 +27,4 @@ services:
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
     depends_on:
-      postgres:
-        condition: service_healthy
-    restart: always
-
-  duckdns:
-    image: lscr.io/linuxserver/duckdns:latest
-    container_name: duckdns
-    network_mode: host
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Recife
-      - SUBDOMAINS=finance-insight
-      - TOKEN=db2a0d35-17e0-4bfd-82a9-c35b17b0ca87
-      - IP=147.15.102.229
-    restart: unless-stopped
+      - postgres

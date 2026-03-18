@@ -1,0 +1,24 @@
+1. Remover o container antigo
+Este comando força a remoção do container que está causando o conflito:
+
+Bash
+sudo docker rm -f postgres-db
+
+2. (Opcional) Limpar containers órfãos
+Se você quiser garantir que não existam outros resquícios de tentativas anteriores, execute:
+
+Bash
+sudo docker compose down
+3. Subir o ambiente novamente
+Agora o nome estará livre e o comando deverá funcionar:
+
+Bash
+sudo docker compose up -d --build
+Dicas úteis de monitoramento:
+Após subir com sucesso, você pode verificar se os containers estão rodando e ver os logs para confirmar se a conexão entre o Spring e o Postgres foi estabelecida:
+
+Verificar status: sudo docker ps
+
+Ver logs da API: sudo docker logs -f easy-api-spring
+
+Ver logs do Banco: sudo docker logs -f postgres-db
