@@ -19,12 +19,14 @@ public class ApplicationConfig {
 
     private final UsuarioRepository usuarioRepository;
 
+    // Define como o Spring vai buscar o usuário no banco para autenticação
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> usuarioRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
     }
 
+    // Configura o provedor de autenticação com o UserDetailsService e o codificador de senha
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -33,11 +35,13 @@ public class ApplicationConfig {
         return authProvider;
     }
 
+    // Gerenciador de autenticação para processar as tentativas de login
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    // Define o algoritmo de criptografia para as senhas (BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -16,14 +16,17 @@ public class DespesaService {
         this.repo = repo;
     }
 
+    // Lista todas as despesas vinculadas a um usuário específico
     public List<Despesa> listarPorUsuario(Usuario u) {
         return repo.findByUsuario(u);
     }
 
+    // Salva uma nova despesa ou atualiza uma existente
     public Despesa salvar(Despesa d) {
         return repo.save(d);
     }
 
+    // Remove uma despesa pelo ID
     public void deletar(Long id) {
         repo.deleteById(id);
     }

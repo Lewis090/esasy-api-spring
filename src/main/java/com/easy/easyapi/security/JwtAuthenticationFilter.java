@@ -32,14 +32,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
+
+        // Se não houver cabeçalho de autorização ou se não for Bearer, deixamos passar (outros filtros cuidarão disso)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
+        // Extraímos o Token e o E-mail
         jwt = authHeader.substring(7);
         userEmail = jwtService.extractUsername(jwt);
+
+        // Se encontramos um e-mail e o usuário ainda não está autenticado no contexto do Spring
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+            // Validamos o token e, se estiver tudo OK, configuramos a autenticação manualmente
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
