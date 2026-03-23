@@ -24,13 +24,53 @@ A API agora conta com uma camada de segurança avançada utilizando **Spring Sec
 
 ### Usando Docker (Recomendado)
 
-Para subir o banco de dados e a aplicação simultaneamente:
+Pré-requisitos:
+
+1. Docker Desktop instalado e em execução.
+2. Docker Compose habilitado (comando `docker compose`).
+
+Passo a passo para criar e subir os containers:
+
+1. No terminal, abra a pasta raiz do projeto.
+2. Gere a imagem e suba a API com o banco:
 
 ```bash
-docker-compose up --build
+docker compose up --build -d app postgres
 ```
 
-O `docker-compose` já está configurado com healthchecks e as variáveis de ambiente necessárias para o funcionamento local.
+3. Verifique se os containers estão ativos:
+
+```bash
+docker compose ps
+```
+
+4. Acompanhe os logs da API:
+
+```bash
+docker compose logs -f app
+```
+
+5. Para parar todos os serviços:
+
+```bash
+docker compose down
+```
+
+6. Para parar e remover também os dados persistidos (reset completo do banco):
+
+```bash
+docker compose down -v
+```
+
+O arquivo de composição já inclui variáveis de ambiente e healthchecks para facilitar a execução local.
+
+#### Subir apenas o banco de dados
+
+Se quiser rodar a API pela IDE e usar só o Postgres no Docker:
+
+```bash
+docker compose up -d postgres
+```
 
 ### Execução Local (IDE / Maven)
 
