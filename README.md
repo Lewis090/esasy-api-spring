@@ -256,7 +256,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👨‍💻 Autor
 
-**Lewis Silva**
+**Levi de Oliveira**
 - GitHub: [@Lewis090](https://github.com/Lewis090)
 - Repositório: [esasy-api-spring](https://github.com/Lewis090/esasy-api-spring)
 
