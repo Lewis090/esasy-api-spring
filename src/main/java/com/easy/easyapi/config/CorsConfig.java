@@ -20,7 +20,7 @@ public class CorsConfig {
                         "http://127.0.0.1:5173",
                         "http://localhost:5173",
                         "https://ease-frontend-main*.vercel.app", // Aceita qualquer deploy da vercel deste projeto
-                        "https://vercel.app"
+                        "https://vercel.app",
                         "https://ease-frontend-tau.vercel.app"// Coloque aqui a URL exata que a Vercel te deu
                     )
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
