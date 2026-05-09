@@ -3,14 +3,14 @@ package com.easy.easyapi.dto;
 import com.easy.easyapi.model.Despesa;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class DespesaDTO {
     private Long id;
     private String descricao;
     private Double valor;
-    private LocalDateTime data;
+    private LocalDate data;
     private Long usuarioId;
 
     public static DespesaDTO fromEntity(Despesa d) {

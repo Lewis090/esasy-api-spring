@@ -3,7 +3,7 @@ package com.easy.easyapi.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -14,7 +14,7 @@ public class Receita {
 
     private String descricao;
     private Double valor;
-    private LocalDateTime data;
+    private LocalDate data;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

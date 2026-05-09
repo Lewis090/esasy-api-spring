@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 public class DespesaCreateDTO {
@@ -16,7 +16,7 @@ public class DespesaCreateDTO {
     private Double valor;
 
     @NotNull
-    private LocalDateTime data;
+    private LocalDate data;
 
     public Despesa toEntity() {
         Despesa d = new Despesa();
