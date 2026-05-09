@@ -16,7 +16,7 @@ import jakarta.validation.Valid;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/transacao")
+@RequestMapping("/transacoes")
 public class TransacaoController {
 
     private final ReceitaService receitaService;
@@ -54,7 +54,7 @@ public class TransacaoController {
             receita.setData(dto.getData());
             Receita novaReceita = receitaService.salvar(receita, usuario);
             return new ResponseEntity<>(novaReceita, HttpStatus.CREATED);
-        } else if ("DESPESA".equals(tipo) || ("".equals(tipo) && dto.getValor() < 0)) {
+        } else if ("DESPESA".equals(tipo) || tipo.startsWith("DESPESA") || ("".equals(tipo) && dto.getValor() < 0)) {
             Despesa despesa = new Despesa();
             despesa.setDescricao(dto.getDescricao());
             despesa.setValor(Math.abs(dto.getValor()));
