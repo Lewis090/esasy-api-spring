@@ -106,4 +106,38 @@ public class TransacaoController {
             return ResponseEntity.badRequest().body("Tipo de transação inválido ou não foi possível inferir pelo valor.");
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id, @RequestParam Long userId) {
+        if (!isUsuarioAutenticadoOwner(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(userId);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Usuario usuario = usuarioOpt.get();
+
+        boolean deleted = false;
+
+        Optional<Receita> rec = receitaService.buscarPorIdEUsuario(id, usuario);
+        if (rec.isPresent()) {
+            receitaService.deletar(id, usuario);
+            deleted = true;
+        } else {
+            Optional<Despesa> desp = despesaService.listarPorUsuario(usuario).stream()
+                    .filter(d -> d.getId().equals(id))
+                    .findFirst();
+            if (desp.isPresent()) {
+                despesaService.deletar(id);
+                deleted = true;
+            }
+        }
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
