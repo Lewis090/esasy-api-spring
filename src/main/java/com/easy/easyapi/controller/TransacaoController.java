@@ -93,7 +93,14 @@ public class TransacaoController {
             receita.setValor(Math.abs(dto.getValor()));
             receita.setData(dto.getData());
             Receita novaReceita = receitaService.salvar(receita, usuario);
-            return new ResponseEntity<>(novaReceita, HttpStatus.CREATED);
+
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", novaReceita.getId());
+            m.put("descricao", novaReceita.getDescricao());
+            m.put("valor", novaReceita.getValor());
+            m.put("data", novaReceita.getData() != null ? novaReceita.getData().toString() : null);
+            m.put("tipo", "RECEITA");
+            return new ResponseEntity<>(m, HttpStatus.CREATED);
         } else if ("DESPESA".equals(tipo) || tipo.startsWith("DESPESA") || ("".equals(tipo) && dto.getValor() < 0)) {
             Despesa despesa = new Despesa();
             despesa.setDescricao(dto.getDescricao());
@@ -101,7 +108,14 @@ public class TransacaoController {
             despesa.setData(dto.getData());
             despesa.setUsuario(usuario);
             Despesa novaDespesa = despesaService.salvar(despesa);
-            return new ResponseEntity<>(novaDespesa, HttpStatus.CREATED);
+
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("id", novaDespesa.getId());
+            m.put("descricao", novaDespesa.getDescricao());
+            m.put("valor", novaDespesa.getValor());
+            m.put("data", novaDespesa.getData() != null ? novaDespesa.getData().toString() : null);
+            m.put("tipo", "DESPESA_VARIAVEL");
+            return new ResponseEntity<>(m, HttpStatus.CREATED);
         } else {
             return ResponseEntity.badRequest().body("Tipo de transação inválido ou não foi possível inferir pelo valor.");
         }
